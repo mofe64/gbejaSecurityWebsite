@@ -5,9 +5,10 @@ import {
   Send, Sparkles, MapPin, Clock, Award, Lock, Eye, Radio,
   TrendingUp, Users, Activity, Calendar, FileText, CreditCard,
   AlertTriangle, CheckCircle2, ChevronDown, Globe, Briefcase,
-  Building2, Crown, Newspaper, BookOpen, ArrowRight, Bell,
-  Layers, Zap, Target, Compass
+  Building2, Crown, Newspaper, ArrowRight, Bell,
+  Layers, Zap, Target
 } from "lucide-react";
+import heroOperationalTerrain from "./assets/hero-operational-terrain.webp";
 
 // ─────────────────────────────────────────────────────────────────
 //  GBÈJÀ GLOBAL SECURITY — Website
@@ -66,37 +67,92 @@ const Logo = ({ size = 36 }) => (
   </div>
 );
 
-// ── Animated counter ─────────────────────────────────────────────
-const Counter = ({ value, suffix = "", duration = 2000 }) => {
-  const [count, setCount] = useState(0);
+// ── Scroll-revealed eyebrow ──────────────────────────────────────
+const RevealEyebrow = ({ children }) => {
   const ref = useRef(null);
   const [seen, setSeen] = useState(false);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
       ([e]) => e.isIntersecting && setSeen(true),
-      { threshold: 0.3 }
+      { threshold: 0.45 }
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, []);
 
+  return (
+    <div ref={ref} className={`reveal-eyebrow flex items-center gap-3 mb-4 ${seen ? "is-visible" : ""}`}>
+      <div className="reveal-eyebrow__rule h-px w-12" style={{ backgroundColor: GOLD }} />
+      <span className="reveal-eyebrow__mask">
+        <span className="reveal-eyebrow__text text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>
+          {children}
+        </span>
+      </span>
+    </div>
+  );
+};
+
+// ── Scroll-revealed stat ─────────────────────────────────────────
+const RevealStat = ({ value, label, delay = 0 }) => {
+  const ref = useRef(null);
+  const [seen, setSeen] = useState(false);
+
   useEffect(() => {
-    if (!seen) return;
-    const start = Date.now();
-    const tick = () => {
-      const p = Math.min((Date.now() - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setCount(Math.floor(value * eased));
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    tick();
-  }, [seen, value, duration]);
+    const obs = new IntersectionObserver(
+      ([e]) => e.isIntersecting && setSeen(true),
+      { threshold: 0.35 }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
 
   return (
-    <span ref={ref}>
-      {count.toLocaleString()}{suffix}
-    </span>
+    <div
+      ref={ref}
+      className={`hero-stat flex flex-col items-center ${seen ? "is-visible" : ""}`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div
+        className="leading-none mb-3"
+        style={{
+          color: GOLD,
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: "clamp(44px, 7vw, 92px)",
+          fontWeight: 500
+        }}
+      >
+        {value}
+      </div>
+      <div className="max-w-[14rem] text-[11px] tracking-[0.18em] uppercase leading-relaxed" style={{ color: MIST }}>
+        {label}
+      </div>
+    </div>
+  );
+};
+
+// ── Generic scroll reveal ────────────────────────────────────────
+const RevealOnView = ({ children, className = "", delay = 0, style = {} }) => {
+  const ref = useRef(null);
+  const [seen, setSeen] = useState(false);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => e.isIntersecting && setSeen(true),
+      { threshold: 0.24, rootMargin: "0px 0px -8% 0px" }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`scroll-reveal ${seen ? "is-visible" : ""} ${className}`}
+      style={{ ...style, animationDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
   );
 };
 
@@ -115,7 +171,6 @@ const Nav = ({ page, setPage }) => {
     { id: "home", label: "Home" },
     { id: "services", label: "Services" },
     { id: "intelligence", label: "Intelligence" },
-    { id: "sectors", label: "Sectors" },
     { id: "about", label: "About" },
     { id: "insights", label: "Insights" }
   ];
@@ -232,23 +287,30 @@ const Nav = ({ page, setPage }) => {
 const HomePage = ({ setPage }) => (
   <div className="relative">
     {/* Hero */}
-    <section className="relative min-h-screen flex items-center pt-32 pb-20 px-6 md:px-10">
-      <div className="max-w-[1400px] mx-auto w-full">
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-32 pb-20 px-6 md:px-10">
+      <div className="hero-visual" aria-hidden="true">
+        <img src={heroOperationalTerrain} alt="" />
+      </div>
+      <div className="relative z-10 max-w-[1400px] mx-auto w-full">
         <div className="relative">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="h-px w-12" style={{ backgroundColor: GOLD }} />
-            <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>
-              Security · Mobility · Intelligence
+          <div className="hero-eyebrow flex items-center gap-3 mb-10">
+            <div className="hero-eyebrow__rule h-px w-12" style={{ backgroundColor: GOLD }} />
+            <span className="hero-eyebrow__mask">
+              <span className="hero-eyebrow__text text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>
+                Security · Mobility · Intelligence
+              </span>
             </span>
           </div>
 
           <h1
-            className="leading-[0.95] tracking-[-0.02em] mb-10"
+            className="hero-reveal mb-10"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               color: IVORY,
               fontWeight: 500,
-              fontSize: "clamp(40px, 6.5vw, 88px)"
+              fontSize: "clamp(40px, 6.5vw, 88px)",
+              lineHeight: 1.08,
+              letterSpacing: 0
             }}
           >
             The Nigerian terrain,<br/>
@@ -257,15 +319,15 @@ const HomePage = ({ setPage }) => (
           </h1>
 
           <p
-            className="text-lg md:text-2xl leading-relaxed mb-12 max-w-3xl"
+            className="hero-reveal text-lg md:text-2xl leading-relaxed mb-12 max-w-3xl"
             style={{ color: MIST, fontFamily: "'DM Sans', sans-serif" }}
           >
             A premium private security firm built for executives, organisations, and individuals
-            who require the discretion of a global advisory and the operational depth of a firm
+            who require the discretion of a senior advisory team and the operational depth of a firm
             that is, unmistakably, of this country.
           </p>
 
-          <div className="flex flex-wrap gap-4 items-center">
+          <div className="hero-reveal flex flex-wrap gap-4 items-center">
             <button
               onClick={() => setPage("services")}
               className="group flex items-center gap-3 px-7 py-4 text-[12px] tracking-[0.2em] uppercase font-medium transition-all"
@@ -285,20 +347,21 @@ const HomePage = ({ setPage }) => (
           </div>
 
           {/* Trust strip */}
-          <div className="mt-20 pt-8 border-t flex flex-wrap gap-x-12 gap-y-4" style={{ borderColor: `${GOLD}20` }}>
+          <div
+            className="mt-20 pt-10 border-t grid gap-8 text-center sm:grid-cols-3"
+            style={{ borderColor: `${GOLD}20` }}
+          >
             {[
-              ["350,000+", "kilometres safely escorted"],
-              ["10 min", "average emergency response · Lagos"],
-              ["100%", "client transfer safety record"]
-            ].map(([n, l]) => (
-              <div key={l}>
-                <div className="text-2xl mb-1" style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif" }}>
-                  {n}
-                </div>
-                <div className="text-[11px] tracking-[0.15em] uppercase" style={{ color: MIST }}>
-                  {l}
-                </div>
-              </div>
+              { value: "350,000+", label: "kilometres safely escorted" },
+              { value: "10 min", label: "average emergency response · Lagos" },
+              { value: "100%", label: "client transfer safety record" }
+            ].map(({ value, label }, index) => (
+              <RevealStat
+                key={label}
+                value={value}
+                label={label}
+                delay={index * 120}
+              />
             ))}
           </div>
         </div>
@@ -312,12 +375,9 @@ const HomePage = ({ setPage }) => (
           className="text-2xl md:text-4xl leading-snug"
           style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 400 }}
         >
-          The global firms send a consultant on a Tuesday flight.<br/>
-          <span style={{ color: GOLD, fontStyle: "italic" }}>We were already on the road at 4am.</span>
+          The discipline of a global firm.<br/>
+          <span style={{ color: GOLD, fontStyle: "italic" }}>The instincts of a country we have never had to learn.</span>
         </p>
-        <div className="mt-8 text-[11px] tracking-[0.3em] uppercase" style={{ color: MIST }}>
-          The Gbèjà Doctrine · Article I
-        </div>
       </div>
     </section>
 
@@ -326,12 +386,7 @@ const HomePage = ({ setPage }) => (
       <div className="max-w-[1400px] mx-auto">
         <div className="flex items-end justify-between mb-16 flex-wrap gap-6">
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px w-12" style={{ backgroundColor: GOLD }} />
-              <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>
-                Four Pillars · One Platform
-              </span>
-            </div>
+            <RevealEyebrow>Four Pillars · One Platform</RevealEyebrow>
             <h2
               className="text-4xl md:text-6xl leading-tight"
               style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}
@@ -352,7 +407,7 @@ const HomePage = ({ setPage }) => (
         <div className="grid md:grid-cols-2 gap-px" style={{ backgroundColor: `${GOLD}20` }}>
           {[
             {
-              icon: Plane, title: "Airport Concierge & Transfers",
+              icon: Plane, title: "Airport Concierge",
               copy: "Seamless arrival from plane tube to private vehicle. Fast-track immigration, lounge access, baggage handling, security escort.",
               kpi: "35 min", kpiLabel: "avg airport processing"
             },
@@ -375,39 +430,45 @@ const HomePage = ({ setPage }) => (
             <button
               key={s.title}
               onClick={() => setPage("services")}
-              className="group p-10 text-left transition-all hover:bg-white/[0.02]"
+              className="service-card group p-8 md:p-10 text-left transition-all"
               style={{ backgroundColor: NAVY }}
             >
-              <div className="flex items-start justify-between mb-8">
+              <div className="flex items-start justify-between gap-8 mb-10">
                 <div
-                  className="w-14 h-14 flex items-center justify-center border"
-                  style={{ borderColor: `${GOLD}40`, color: GOLD }}
+                  className="service-card__mark flex items-center justify-center"
+                  style={{ color: GOLD }}
                 >
-                  <s.icon size={22} strokeWidth={1.4} />
+                  <s.icon size={34} strokeWidth={1.15} />
                 </div>
-                <span className="text-[11px] tracking-[0.2em] uppercase" style={{ color: MIST }}>
+                <span className="pt-2 text-[11px] tracking-[0.24em] uppercase" style={{ color: MIST }}>
                   0{i + 1}
                 </span>
               </div>
               <h3
-                className="text-2xl md:text-3xl mb-4 leading-tight"
+                className="text-3xl md:text-4xl mb-5 leading-tight"
                 style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}
               >
                 {s.title}
               </h3>
-              <p className="text-[15px] leading-relaxed mb-8" style={{ color: MIST }}>
+              <p className="text-[15px] leading-relaxed mb-10 max-w-xl" style={{ color: MIST }}>
                 {s.copy}
               </p>
-              <div className="flex items-end justify-between pt-6 border-t" style={{ borderColor: `${GOLD}15` }}>
+              <div className="flex flex-col gap-6 pt-7 border-t sm:flex-row sm:items-end sm:justify-between" style={{ borderColor: `${GOLD}15` }}>
                 <div>
-                  <div className="text-3xl mb-1" style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif" }}>
+                  <div className="text-4xl mb-1 leading-none" style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif" }}>
                     {s.kpi}
                   </div>
                   <div className="text-[10px] tracking-[0.2em] uppercase" style={{ color: MIST }}>
                     {s.kpiLabel}
                   </div>
                 </div>
-                <ArrowUpRight size={20} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" style={{ color: GOLD }} />
+                <span
+                  className="service-card__cta inline-flex min-h-11 items-center justify-center gap-2 self-start border px-4 text-[11px] font-medium tracking-[0.22em] uppercase transition-all sm:self-auto"
+                  style={{ borderColor: `${GOLD}35`, color: IVORY }}
+                >
+                  Learn more
+                  <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                </span>
               </div>
             </button>
           ))}
@@ -431,12 +492,11 @@ const HomePage = ({ setPage }) => (
                 className="text-4xl md:text-5xl leading-tight mb-6"
                 style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}
               >
-                Five distinctions<br/>
-                <span style={{ fontStyle: "italic", color: GOLD }}>others cannot match.</span>
+                Five standards<br/>
+                <span style={{ fontStyle: "italic", color: GOLD }}>that define the work.</span>
               </h2>
               <p className="text-base leading-relaxed" style={{ color: MIST }}>
-                Most security firms in Nigeria are sub-contractors with letterhead.
-                We own the platform, the personnel, and the intelligence.
+                Gbèjà combines owned teams, live coordination, and local context into one accountable operating platform.
               </p>
             </div>
           </div>
@@ -446,7 +506,7 @@ const HomePage = ({ setPage }) => (
               { n: "01", t: "Single Coordinated Platform", c: "Airport, ground, protection, response — under one operator with shared client data, shared accountability, and a single point of contact. No vendor stitching.", icon: Layers },
               { n: "02", t: "24/7 Account Stewardship", c: "A dedicated account director — not a call centre — manages your relationship around the clock. Requests handled, issues resolved, briefings delivered, in real time.", icon: Crown },
               { n: "03", t: "Nationwide Operational Depth", c: "Active networks across all 36 states. Lagos, Abuja, Port Harcourt, Kano, Calabar — wherever your principals travel, we are already on the ground.", icon: MapPin },
-              { n: "04", t: "Sovereign Intelligence", c: "Continuous open-source and human-source monitoring through our local network. Threats anticipated rather than reacted to. The advantage that cannot be flown in.", icon: Eye },
+              { n: "04", t: "Ground Intelligence", c: "Continuous open-source and human-source monitoring through our local network. Routes, venues, and neighbourhoods are assessed by people already close to the ground.", icon: Eye },
               { n: "05", t: "Patronage Credit & Flexible Terms", c: "Long-standing clients accrue redeemable credits. Flexible payment from day one, with deepening benefits as the relationship matures.", icon: Award }
             ].map(p => (
               <div key={p.n} className="p-8 md:p-10" style={{ backgroundColor: NAVY_DEEP }}>
@@ -473,46 +533,48 @@ const HomePage = ({ setPage }) => (
       </div>
     </section>
 
-    {/* Local edge — versus global firms */}
+    {/* Local operating edge */}
     <section className="relative py-32 px-6 md:px-10">
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-20">
-          <div className="flex items-center justify-center gap-3 mb-6">
+          <RevealOnView className="flex items-center justify-center gap-3 mb-6">
             <div className="h-px w-12" style={{ backgroundColor: GOLD }} />
             <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>
-              Of Nigeria · For Nigeria
+              Grounded · Coordinated · Accountable
             </span>
             <div className="h-px w-12" style={{ backgroundColor: GOLD }} />
-          </div>
-          <h2
-            className="text-4xl md:text-6xl leading-tight"
-            style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}
-          >
-            What the global firms<br/>
-            <span style={{ fontStyle: "italic", color: GOLD }}>cannot bring on a plane.</span>
-          </h2>
+          </RevealOnView>
+          <RevealOnView delay={120}>
+            <h2
+              className="text-4xl md:text-6xl leading-tight"
+              style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}
+            >
+              The Gbèjà<br/>
+              <span style={{ fontStyle: "italic", color: GOLD }}>Standard.</span>
+            </h2>
+          </RevealOnView>
         </div>
 
         <div className="grid md:grid-cols-2 gap-px" style={{ backgroundColor: `${GOLD}20` }}>
           <div className="p-10 md:p-12" style={{ backgroundColor: NAVY }}>
-            <div className="text-[11px] tracking-[0.3em] uppercase mb-6" style={{ color: MIST }}>
-              The Foreign Approach
-            </div>
+            <RevealOnView className="text-[11px] tracking-[0.3em] uppercase mb-6" delay={40} style={{ color: MIST }}>
+              Where Service Can Break Down
+            </RevealOnView>
             <div className="space-y-5">
               {[
-                "Risk frameworks adapted from London or Reston",
-                "Consultants who arrive Tuesday, leave Friday",
-                "Sub-contracted ground teams of unknown vetting",
-                "USD-priced retainers with foreign-exchange exposure",
-                "Decisions waiting for HQ approval across time zones",
-                "Cultural fluency limited to a phrasebook"
+                "Plans built without enough ground context",
+                "Handoffs between teams that do not share one command line",
+                "Personnel whose vetting and standards are hard to verify",
+                "Fees that change when assumptions or exchange rates move",
+                "Urgent decisions slowed by too many approval layers",
+                "Local nuance discovered after the moment has passed"
               ].map((t, i) => (
-                <div key={i} className="flex gap-4 items-start">
+                <RevealOnView key={i} className="flex gap-4 items-start" delay={100 + i * 55}>
                   <div className="w-6 h-6 flex-shrink-0 mt-0.5 flex items-center justify-center border" style={{ borderColor: `${MIST}40` }}>
                     <X size={12} style={{ color: MIST }} />
                   </div>
                   <p className="text-[15px] leading-relaxed" style={{ color: MIST }}>{t}</p>
-                </div>
+                </RevealOnView>
               ))}
             </div>
           </div>
@@ -523,24 +585,24 @@ const HomePage = ({ setPage }) => (
               style={{ background: `radial-gradient(circle, ${GOLD}, transparent 70%)`, filter: "blur(40px)" }}
             />
             <div className="relative">
-              <div className="text-[11px] tracking-[0.3em] uppercase mb-6" style={{ color: GOLD }}>
-                The Gbèjà Approach
-              </div>
+              <RevealOnView className="text-[11px] tracking-[0.3em] uppercase mb-6" delay={120} style={{ color: GOLD }}>
+                The Gbèjà Standard
+              </RevealOnView>
               <div className="space-y-5">
                 {[
-                  "Frameworks built from 350,000+ km of Nigerian road",
-                  "Officers who served the Nigerian state, then served you",
-                  "100% in-house personnel, 100% accountable",
-                  "Naira-denominated billing, no FX surprises",
-                  "Decisions made in Lagos, in real time, by name",
-                  "Yoruba, Igbo, Hausa, Pidgin — whichever the situation demands"
+                  "Plans shaped by 350,000+ km on Nigerian roads",
+                  "Veteran officers who know the terrain firsthand",
+                  "Gbèjà teams you can verify and hold accountable",
+                  "Naira pricing, agreed upfront, with no FX surprises",
+                  "Decisions made in Lagos while the situation is live",
+                  "Local language and context when the moment demands it"
                 ].map((t, i) => (
-                  <div key={i} className="flex gap-4 items-start">
+                  <RevealOnView key={i} className="flex gap-4 items-start" delay={180 + i * 55}>
                     <div className="w-6 h-6 flex-shrink-0 mt-0.5 flex items-center justify-center" style={{ backgroundColor: GOLD }}>
                       <CheckCircle2 size={14} style={{ color: NAVY_DEEP }} />
                     </div>
                     <p className="text-[15px] leading-relaxed" style={{ color: IVORY }}>{t}</p>
-                  </div>
+                  </RevealOnView>
                 ))}
               </div>
             </div>
@@ -553,22 +615,22 @@ const HomePage = ({ setPage }) => (
     <section className="relative py-24 px-6 md:px-10 border-y" style={{ borderColor: `${GOLD}20`, backgroundColor: NAVY_DEEP }}>
       <div className="max-w-[1400px] mx-auto grid md:grid-cols-4 gap-12 text-center">
         {[
-          { n: 350000, suf: "+", l: "Kilometres safely escorted" },
-          { n: 10000, suf: "+", l: "Hours of protection coverage" },
-          { n: 120, suf: "+", l: "Principal operations completed" },
-          { n: 36, suf: "", l: "States of operational coverage" }
-        ].map(s => (
-          <div key={s.l}>
+          { value: "350,000+", l: "Kilometres safely escorted" },
+          { value: "10,000+", l: "Hours of protection coverage" },
+          { value: "120+", l: "Principal operations completed" },
+          { value: "36", l: "States of operational coverage" }
+        ].map((s, i) => (
+          <RevealOnView key={s.l} delay={i * 110}>
             <div
               className="text-5xl md:text-6xl mb-3"
               style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif", fontWeight: 500 }}
             >
-              <Counter value={s.n} suffix={s.suf} />
+              {s.value}
             </div>
             <div className="text-[11px] tracking-[0.3em] uppercase" style={{ color: MIST }}>
               {s.l}
             </div>
-          </div>
+          </RevealOnView>
         ))}
       </div>
     </section>
@@ -589,9 +651,6 @@ const HomePage = ({ setPage }) => (
               <span style={{ fontStyle: "italic", color: GOLD }}>industries that cannot fail.</span>
             </h2>
           </div>
-          <button onClick={() => setPage("sectors")} className="text-[12px] tracking-[0.2em] uppercase flex items-center gap-2 hover:gap-3 transition-all" style={{ color: GOLD }}>
-            All sectors <ArrowRight size={14} />
-          </button>
         </div>
 
         <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-px" style={{ backgroundColor: `${GOLD}15` }}>
@@ -622,15 +681,15 @@ const HomePage = ({ setPage }) => (
           className="text-5xl md:text-7xl leading-[1] mb-10"
           style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}
         >
-          A confidential conversation<br/>
+          A conversation<br/>
           <span style={{ fontStyle: "italic", color: GOLD }}>begins everything.</span>
         </h2>
         <button
-          onClick={() => setPage("contact")}
+          onClick={() => setPage("booking")}
           className="px-10 py-5 text-[12px] tracking-[0.25em] uppercase font-medium transition-all hover:opacity-90"
           style={{ backgroundColor: GOLD, color: NAVY_DEEP }}
         >
-          Request Briefing
+          Request a quote
         </button>
       </div>
     </section>
@@ -643,9 +702,9 @@ const ServicesPage = ({ setPage }) => {
 
   const services = {
     airport: {
-      n: "01", icon: Plane, title: "Airport Concierge & Transfers",
-      tag: "Arrival without friction",
-      overview: "From the moment your aircraft door opens to the moment your principal closes the door of a vetted vehicle, every contact, every checkpoint, every minute is choreographed.",
+      n: "01", icon: Plane, title: "Airport Concierge",
+      tag: "Arrivals and departures, handled end-to-end",
+      overview: "From aircraft door to secure vehicle, and from hotel lobby back through airport departure, every handoff, checkpoint, porter, lounge, and transfer is choreographed around the principal.",
       forWhom: ["Executive arrivals", "Corporate delegations", "High-profile guests", "First-time visitors to Nigeria", "Tight connections"],
       delivers: [
         "Pickup at plane tube or Port Health, before immigration",
@@ -757,7 +816,7 @@ const ServicesPage = ({ setPage }) => {
   return (
     <div className="relative pt-32 pb-20">
       <section className="px-6 md:px-10 mb-16">
-        <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-[1400px] mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-12" style={{ backgroundColor: GOLD }} />
             <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>Our Services</span>
@@ -770,7 +829,7 @@ const ServicesPage = ({ setPage }) => {
             Every Gbèjà service draws on the same intelligence, the same fleet, the same vetted personnel,
             and the same dedicated account leadership. There is no vendor stitching, no quality drift between assignments.
           </p>
-        </div>
+      </div>
       </section>
 
       {/* Service tabs */}
@@ -780,15 +839,20 @@ const ServicesPage = ({ setPage }) => {
             <button
               key={k}
               onClick={() => setActive(k)}
-              className="p-6 text-left transition-all"
+              className={`service-tab group p-6 text-left transition-all ${active === k ? "is-active" : ""}`}
               style={{ backgroundColor: active === k ? NAVY_SOFT : NAVY }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <v.icon size={20} style={{ color: active === k ? GOLD : MIST }} strokeWidth={1.4} />
-                <span className="text-[10px] tracking-[0.2em]" style={{ color: active === k ? GOLD : MIST }}>{v.n}</span>
+              <div className="flex items-start justify-between gap-5 mb-6">
+                <span className="service-tab__mark flex items-center justify-center" style={{ color: active === k ? GOLD : MIST }}>
+                  <v.icon size={24} strokeWidth={1.25} />
+                </span>
+                <span className="pt-1 text-[10px] tracking-[0.24em]" style={{ color: active === k ? GOLD : MIST }}>{v.n}</span>
               </div>
-              <div className="text-sm leading-tight" style={{ color: active === k ? IVORY : MIST, fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem" }}>
+              <div className="text-xl leading-tight mb-3" style={{ color: active === k ? IVORY : MIST, fontFamily: "'Cormorant Garamond', serif", fontWeight: 500 }}>
                 {v.title}
+              </div>
+              <div className="text-[10px] tracking-[0.18em] uppercase leading-relaxed" style={{ color: active === k ? GOLD : `${MIST}CC` }}>
+                {v.tag}
               </div>
             </button>
           ))}
@@ -797,10 +861,20 @@ const ServicesPage = ({ setPage }) => {
 
       {/* Active service detail */}
       <section className="px-6 md:px-10 mb-20">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="grid lg:grid-cols-12 gap-12">
+      <div className="max-w-[1400px] mx-auto">
+          <div className="service-detail-grid grid lg:grid-cols-12 gap-12">
             <div className="lg:col-span-5">
-              <div className="text-[11px] tracking-[0.3em] uppercase mb-4" style={{ color: GOLD }}>{s.tag}</div>
+              <div className="service-detail-kicker flex items-center gap-5 mb-8">
+                <div className="service-detail-mark flex items-center justify-center" style={{ color: GOLD }}>
+                  <s.icon size={34} strokeWidth={1.15} />
+                </div>
+                <div>
+                  <div className="text-[10px] tracking-[0.28em] uppercase mb-2" style={{ color: MIST }}>
+                    Service {s.n}
+                  </div>
+                  <div className="text-[11px] tracking-[0.24em] uppercase leading-relaxed" style={{ color: GOLD }}>{s.tag}</div>
+                </div>
+              </div>
               <h2 className="text-4xl md:text-5xl mb-6 leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}>
                 {s.title}
               </h2>
@@ -808,10 +882,10 @@ const ServicesPage = ({ setPage }) => {
                 {s.overview}
               </p>
 
-              <div className="grid grid-cols-3 gap-6 mb-10 pb-10 border-b" style={{ borderColor: `${GOLD}20` }}>
+              <div className="service-stat-strip grid sm:grid-cols-3 gap-px mb-10" style={{ backgroundColor: `${GOLD}18` }}>
                 {s.stats.map(st => (
-                  <div key={st.l}>
-                    <div className="text-3xl mb-1" style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif" }}>
+                  <div key={st.l} className="p-5" style={{ backgroundColor: NAVY }}>
+                    <div className="text-3xl mb-2 leading-none" style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif" }}>
                       {st.n}{st.suf}
                     </div>
                     <div className="text-[10px] tracking-[0.15em] uppercase leading-tight" style={{ color: MIST }}>
@@ -825,7 +899,7 @@ const ServicesPage = ({ setPage }) => {
                 <div className="text-[11px] tracking-[0.3em] uppercase mb-4" style={{ color: GOLD }}>Frequently Requested For</div>
                 <div className="flex flex-wrap gap-2">
                   {s.forWhom.map(f => (
-                    <span key={f} className="px-3 py-1.5 text-[12px] border" style={{ borderColor: `${GOLD}30`, color: IVORY }}>
+                    <span key={f} className="service-chip px-3 py-1.5 text-[12px] border" style={{ borderColor: `${GOLD}30`, color: IVORY }}>
                       {f}
                     </span>
                   ))}
@@ -834,11 +908,11 @@ const ServicesPage = ({ setPage }) => {
             </div>
 
             <div className="lg:col-span-7">
-              <div className="p-8 md:p-10" style={{ backgroundColor: NAVY_SOFT }}>
+              <div className="service-brief p-8 md:p-10" style={{ backgroundColor: NAVY_SOFT }}>
                 <div className="text-[11px] tracking-[0.3em] uppercase mb-6" style={{ color: GOLD }}>What We Deliver</div>
                 <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 mb-12">
                   {s.delivers.map((d, i) => (
-                    <div key={i} className="flex gap-3 items-start">
+                    <div key={i} className="service-deliverable flex gap-3 items-start">
                       <div className="w-1.5 h-1.5 mt-2.5 flex-shrink-0" style={{ backgroundColor: GOLD }} />
                       <p className="text-[14px] leading-relaxed" style={{ color: IVORY }}>{d}</p>
                     </div>
@@ -850,7 +924,7 @@ const ServicesPage = ({ setPage }) => {
                 </div>
                 <div className="space-y-6">
                   {s.approach.map(([title, body], i) => (
-                    <div key={i} className="grid grid-cols-[auto_1fr] gap-6">
+                    <div key={i} className="service-step grid grid-cols-[auto_1fr] gap-6">
                       <div className="text-2xl pt-1" style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif" }}>
                         0{i + 1}
                       </div>
@@ -872,7 +946,7 @@ const ServicesPage = ({ setPage }) => {
               </button>
             </div>
           </div>
-        </div>
+      </div>
       </section>
 
       {/* Cross-cutting capability strip */}
@@ -919,7 +993,7 @@ const IntelligencePage = ({ setPage }) => {
         <div className="max-w-[1400px] mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-12" style={{ backgroundColor: GOLD }} />
-            <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>Sovereign Intelligence</span>
+            <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>Ground Intelligence</span>
           </div>
           <h1 className="text-5xl md:text-7xl mb-8 leading-[1.05]" style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}>
             Intelligence written<br/>
@@ -1075,78 +1149,6 @@ const IntelligencePage = ({ setPage }) => {
   );
 };
 
-// ── SECTORS PAGE ─────────────────────────────────────────────────
-const SectorsPage = ({ setPage }) => (
-  <div className="relative pt-32 pb-20">
-    <section className="px-6 md:px-10 mb-20">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-px w-12" style={{ backgroundColor: GOLD }} />
-          <span className="text-[11px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>Sectors We Serve</span>
-        </div>
-        <h1 className="text-5xl md:text-7xl mb-8 leading-[1.05]" style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}>
-          Operational fluency across<br/>
-          <span style={{ fontStyle: "italic", color: GOLD }}>industries that cannot fail.</span>
-        </h1>
-      </div>
-    </section>
-
-    <section className="px-6 md:px-10 mb-20">
-      <div className="max-w-[1400px] mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-px" style={{ backgroundColor: `${GOLD}20` }}>
-        {[
-          { i: Briefcase, t: "Diplomatic Missions & IGOs", c: "Embassies, high commissions, multilateral organisations operating in Nigeria. Visa-status-aware logistics, sovereign-protocol fluency." },
-          { i: Building2, t: "Multinational Corporates", c: "Country-leadership transitions, board visits, executive roadshows. Compliance with global security standards translated to local execution." },
-          { i: Crown, t: "HNW Family Offices", c: "Multi-generational principal protection. Discreet movement for family members, residential security, travel coordination across cities." },
-          { i: TrendingUp, t: "Energy, Oil & Gas", c: "Onshore site visits, expat rotation logistics, pre-deployment risk assessments. Operational depth in Niger Delta and onshore axes." },
-          { i: Globe, t: "Media & Entertainment", c: "Visiting talent, press tours, film and broadcast crews. Coordinated transport, location security, paparazzi management." },
-          { i: Users, t: "Conferences & Events", c: "Multi-day, multi-venue event security. Delegation coordination, VIP transfer, integrated venue protection." },
-          { i: Activity, t: "Financial Services", c: "Senior executive movement, regulator-meeting logistics, sensitive-data transit. Sub-second discretion." },
-          { i: BookOpen, t: "Academic & Research", c: "Visiting scholars, fieldwork in remote areas, international partnership delegations." },
-          { i: Compass, t: "Private Travel & Hospitality", c: "Yacht arrivals, helicopter transfers, private-jet handling. Concierge integration with luxury hotels and resorts." }
-        ].map(s => (
-          <div key={s.t} className="p-10 group transition-all hover:bg-white/[0.02]" style={{ backgroundColor: NAVY }}>
-            <div
-              className="w-12 h-12 flex items-center justify-center border mb-6 transition-colors group-hover:border-[#C9A961]"
-              style={{ borderColor: `${GOLD}40`, color: GOLD }}
-            >
-              <s.i size={20} strokeWidth={1.4} />
-            </div>
-            <h3 className="text-2xl mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}>
-              {s.t}
-            </h3>
-            <p className="text-[14px] leading-relaxed" style={{ color: MIST }}>{s.c}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    {/* Certifications */}
-    <section className="px-6 md:px-10 py-20 border-y" style={{ borderColor: `${GOLD}20`, backgroundColor: NAVY_DEEP }}>
-      <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-12">
-          <div className="text-[11px] tracking-[0.3em] uppercase mb-4" style={{ color: GOLD }}>Standards & Affiliations</div>
-          <h2 className="text-3xl md:text-5xl" style={{ fontFamily: "'Cormorant Garamond', serif", color: IVORY, fontWeight: 500 }}>
-            Vetted, certified,<br/><span style={{ fontStyle: "italic", color: GOLD }}>nationally licensed.</span>
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px max-w-[1100px] mx-auto" style={{ backgroundColor: `${GOLD}15` }}>
-          {[
-            { t: "NSCDC", s: "Licensed Private Guard Co." },
-            { t: "ISO 27001", s: "Information Security (in progress)" },
-            { t: "ASIS Member", s: "Intl. Security Body" },
-            { t: "NIS Compliant", s: "Nigerian Immigration Liaison" }
-          ].map(c => (
-            <div key={c.t} className="p-8 text-center" style={{ backgroundColor: NAVY }}>
-              <div className="text-2xl mb-2" style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif" }}>{c.t}</div>
-              <div className="text-[11px] tracking-[0.15em] uppercase" style={{ color: MIST }}>{c.s}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  </div>
-);
-
 // ── ABOUT PAGE ───────────────────────────────────────────────────
 const AboutPage = () => (
   <div className="relative pt-32 pb-20">
@@ -1163,14 +1165,13 @@ const AboutPage = () => (
         <div className="max-w-3xl space-y-6 text-lg leading-relaxed" style={{ color: MIST }}>
           <p>
             <strong style={{ color: IVORY }}>Gbèjà</strong> — in Yoruba, <em>to defend, to shield, to stand for</em>.
-            The name was deliberate. We exist because Nigeria's premium clients —
-            executives, diplomats, family principals — were being served either by global firms with no ground presence,
-            or by local firms with no premium discipline.
+            The name was deliberate. We exist to protect people, journeys, homes, and organisations moving through
+            Nigeria with the care, discretion, and seriousness their circumstances require.
           </p>
           <p>
-            We built Gbèjà to close that gap. A firm with the operational rigour, accountability, and intelligence depth
-            of a Garda or Control Risks — owned, staffed, and led by Nigerians who know that the difference
-            between a good evening and a crisis is often a phone call to the right person, made an hour earlier.
+            We built Gbèjà around operational rigour, accountable personnel, and intelligence shaped by local presence.
+            The difference between a good evening and a crisis is often a phone call to the right person,
+            made an hour earlier.
           </p>
         </div>
       </div>
@@ -1327,20 +1328,39 @@ const InsightsPage = () => {
 const BookingPage = ({ setPage }) => {
   const [step, setStep] = useState(1);
   const [data, setData] = useState({
-    service: "", urgency: "", date: "", time: "", from: "", to: "",
+    service: "", urgency: "", airportDirection: "", date: "", time: "", from: "", to: "",
     duration: "", principals: 1, vehicleClass: "", flightNumber: "",
     threatLevel: "", specialReq: "",
     name: "", org: "", email: "", phone: "", consent: false
   });
   const [done, setDone] = useState(false);
   const set = (k, v) => setData(d => ({ ...d, [k]: v }));
+  const chooseService = (service) => {
+    setData(d => ({
+      ...d,
+      service,
+      airportDirection: service === "airport_concierge" ? d.airportDirection : ""
+    }));
+  };
 
   const services = [
-    { id: "airport", t: "Airport Concierge & Transfer", i: Plane },
-    { id: "transport", t: "In-Town Transportation", i: Car },
-    { id: "protection", t: "Specialised Private Protection", i: Shield },
-    { id: "emergency", t: "Emergency Response Subscription", i: Siren }
+    { id: "airport_concierge", t: "Airport Concierge", i: Plane, baseFee: 450000, note: "Meet, fast-track, lounge, porter, escort" },
+    { id: "airport_transfer", t: "Airport Transfer", i: Car, baseFee: 220000, note: "Secure vehicle and driver between airport and destination" },
+    { id: "transport", t: "In-Town Transportation", i: Car, baseFee: 180000, note: "Monitored executive mobility within city" },
+    { id: "protection", t: "Specialised Private Protection", i: Shield, baseFee: 650000, note: "Close protection detail and route planning" },
+    { id: "emergency", t: "Emergency Response Subscription", i: Siren, baseFee: 350000, note: "Residential response setup and subscription intake" }
   ];
+  const urgencyTiers = [
+    { id: "routine", label: "Routine", window: "≥72h", multiplier: 1, note: "Standard planning window" },
+    { id: "priority", label: "Priority", window: "<72h", multiplier: 1.25, note: "Compressed planning and confirmation" },
+    { id: "urgent", label: "Urgent", window: "<24h", multiplier: 1.5, note: "Immediate operations review" }
+  ];
+  const selectedService = services.find(s => s.id === data.service);
+  const selectedUrgency = urgencyTiers.find(u => u.id === data.urgency);
+  const baseFee = selectedService?.baseFee || 0;
+  const urgencyFee = selectedUrgency ? Math.round(baseFee * (selectedUrgency.multiplier - 1)) : 0;
+  const finalFee = selectedService && selectedUrgency ? baseFee + urgencyFee : 0;
+  const money = (amount) => `₦${amount.toLocaleString()}`;
 
   if (done) {
     return (
@@ -1397,15 +1417,23 @@ const BookingPage = ({ setPage }) => {
                 <label className="text-[11px] tracking-[0.2em] uppercase block mb-4" style={{ color: GOLD }}>Service Required</label>
                 <div className="grid md:grid-cols-2 gap-3">
                   {services.map(sv => (
-                    <button key={sv.id} onClick={() => set("service", sv.id)}
-                      className="p-5 border flex items-center gap-4 text-left transition-all"
+                    <button key={sv.id} onClick={() => chooseService(sv.id)}
+                      className="p-5 border text-left transition-all"
                       style={{
                         borderColor: data.service === sv.id ? GOLD : `${GOLD}30`,
                         backgroundColor: data.service === sv.id ? `${GOLD}10` : "transparent",
                         color: IVORY
                       }}>
-                      <sv.i size={20} style={{ color: GOLD }} strokeWidth={1.4} />
-                      <span className="text-[14px]">{sv.t}</span>
+                      <div className="flex items-center gap-4 mb-3">
+                        <sv.i size={20} style={{ color: GOLD }} strokeWidth={1.4} />
+                        <span className="text-[14px]" style={{ fontWeight: 500 }}>{sv.t}</span>
+                      </div>
+                      <div className="text-[12px] leading-relaxed mb-3" style={{ color: MIST }}>
+                        {sv.note}
+                      </div>
+                      <div className="text-[10px] tracking-[0.18em] uppercase" style={{ color: GOLD }}>
+                        From {money(sv.baseFee)}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -1413,16 +1441,24 @@ const BookingPage = ({ setPage }) => {
 
               <div>
                 <label className="text-[11px] tracking-[0.2em] uppercase block mb-4" style={{ color: GOLD }}>Urgency</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {["Routine (>72h)", "Priority (24-72h)", "Urgent (<24h)"].map(u => (
-                    <button key={u} onClick={() => set("urgency", u)}
-                      className="p-4 border text-[13px] transition-all"
+                <div className="grid md:grid-cols-3 gap-3">
+                  {urgencyTiers.map(u => (
+                    <button key={u.id} onClick={() => set("urgency", u.id)}
+                      className="p-4 border text-left transition-all"
                       style={{
-                        borderColor: data.urgency === u ? GOLD : `${GOLD}30`,
-                        backgroundColor: data.urgency === u ? `${GOLD}10` : "transparent",
+                        borderColor: data.urgency === u.id ? GOLD : `${GOLD}30`,
+                        backgroundColor: data.urgency === u.id ? `${GOLD}10` : "transparent",
                         color: IVORY
                       }}>
-                      {u}
+                      <div className="text-[13px] mb-1" style={{ fontWeight: 500 }}>
+                        {u.label} <span style={{ color: GOLD }}>{u.window}</span>
+                      </div>
+                      <div className="text-[11px] leading-relaxed mb-3" style={{ color: MIST }}>
+                        {u.note}
+                      </div>
+                      <div className="text-[10px] tracking-[0.18em] uppercase" style={{ color: GOLD }}>
+                        {u.multiplier === 1 ? "No urgency fee" : `+${Math.round((u.multiplier - 1) * 100)}% urgency fee`}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -1446,24 +1482,60 @@ const BookingPage = ({ setPage }) => {
                     style={{ borderColor: `${GOLD}40`, color: IVORY, colorScheme: "dark" }} />
                 </div>
               </div>
-              {data.service === "airport" && (
+              {data.service === "airport_concierge" && (
+                <>
+                  <div>
+                    <label className="text-[11px] tracking-[0.2em] uppercase block mb-3" style={{ color: GOLD }}>Airport Concierge Flow</label>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {[
+                        { id: "arrival", label: "Arrival", copy: "Meet aircraft or arrivals point, fast-track inward movement, hand over to onward transport." },
+                        { id: "departure", label: "Departure", copy: "Collect from hotel or residence, manage airport entry, check-in, lounge, and boarding flow." }
+                      ].map(option => (
+                        <button key={option.id} onClick={() => set("airportDirection", option.id)}
+                          className="p-4 border text-left transition-all"
+                          style={{
+                            borderColor: data.airportDirection === option.id ? GOLD : `${GOLD}30`,
+                            backgroundColor: data.airportDirection === option.id ? `${GOLD}10` : "transparent",
+                            color: IVORY
+                          }}>
+                          <div className="text-[13px] mb-2" style={{ fontWeight: 500 }}>{option.label}</div>
+                          <div className="text-[12px] leading-relaxed" style={{ color: MIST }}>{option.copy}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[11px] tracking-[0.2em] uppercase block mb-3" style={{ color: GOLD }}>
+                      {data.airportDirection === "departure" ? "Departure Flight Number" : "Arrival Flight Number"}
+                    </label>
+                    <input type="text" placeholder="e.g. BA075" value={data.flightNumber} onChange={e => set("flightNumber", e.target.value)}
+                      className="w-full px-4 py-3 bg-transparent border focus:outline-none"
+                      style={{ borderColor: `${GOLD}40`, color: IVORY }} />
+                  </div>
+                </>
+              )}
+              {data.service === "airport_transfer" && (
                 <div>
                   <label className="text-[11px] tracking-[0.2em] uppercase block mb-3" style={{ color: GOLD }}>Flight Number</label>
-                  <input type="text" placeholder="e.g. BA075" value={data.flightNumber} onChange={e => set("flightNumber", e.target.value)}
+                  <input type="text" placeholder="Optional, e.g. BA075" value={data.flightNumber} onChange={e => set("flightNumber", e.target.value)}
                     className="w-full px-4 py-3 bg-transparent border focus:outline-none"
                     style={{ borderColor: `${GOLD}40`, color: IVORY }} />
                 </div>
               )}
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] tracking-[0.2em] uppercase block mb-3" style={{ color: GOLD }}>From</label>
-                  <input type="text" placeholder="e.g. MMIA T2 / Ikoyi residence" value={data.from} onChange={e => set("from", e.target.value)}
+                  <label className="text-[11px] tracking-[0.2em] uppercase block mb-3" style={{ color: GOLD }}>
+                    {data.service === "airport_concierge" && data.airportDirection === "departure" ? "Pickup Location" : "From"}
+                  </label>
+                  <input type="text" placeholder={data.service === "airport_concierge" && data.airportDirection === "departure" ? "e.g. Ikoyi residence / Eko Hotel" : "e.g. MMIA T2 / Ikoyi residence"} value={data.from} onChange={e => set("from", e.target.value)}
                     className="w-full px-4 py-3 bg-transparent border focus:outline-none"
                     style={{ borderColor: `${GOLD}40`, color: IVORY }} />
                 </div>
                 <div>
-                  <label className="text-[11px] tracking-[0.2em] uppercase block mb-3" style={{ color: GOLD }}>To</label>
-                  <input type="text" placeholder="e.g. Eko Hotel / VI office" value={data.to} onChange={e => set("to", e.target.value)}
+                  <label className="text-[11px] tracking-[0.2em] uppercase block mb-3" style={{ color: GOLD }}>
+                    {data.service === "airport_concierge" && data.airportDirection === "arrival" ? "Handover Destination" : data.service === "airport_concierge" && data.airportDirection === "departure" ? "Airport / Terminal" : "To"}
+                  </label>
+                  <input type="text" placeholder={data.service === "airport_concierge" && data.airportDirection === "departure" ? "e.g. MMIA Terminal 2" : "e.g. Eko Hotel / VI office"} value={data.to} onChange={e => set("to", e.target.value)}
                     className="w-full px-4 py-3 bg-transparent border focus:outline-none"
                     style={{ borderColor: `${GOLD}40`, color: IVORY }} />
                 </div>
@@ -1566,6 +1638,38 @@ const BookingPage = ({ setPage }) => {
               </label>
             </div>
           )}
+        </div>
+
+        <div className="mt-6 p-5 border" style={{ borderColor: `${GOLD}25`, backgroundColor: NAVY }}>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="text-[10px] tracking-[0.24em] uppercase mb-2" style={{ color: GOLD }}>
+                Estimated Starting Fee
+              </div>
+              <div className="text-3xl leading-none" style={{ color: IVORY, fontFamily: "'Cormorant Garamond', serif" }}>
+                {finalFee ? money(finalFee) : "Select service and urgency"}
+              </div>
+            </div>
+            <div className="grid gap-2 text-[12px] md:min-w-[260px]" style={{ color: MIST }}>
+              <div className="flex justify-between gap-6">
+                <span>Service base</span>
+                <span style={{ color: IVORY }}>{selectedService ? money(baseFee) : "—"}</span>
+              </div>
+              <div className="flex justify-between gap-6">
+                <span>{selectedUrgency ? `${selectedUrgency.label} urgency` : "Urgency adjustment"}</span>
+                <span style={{ color: IVORY }}>{selectedUrgency ? money(urgencyFee) : "—"}</span>
+              </div>
+              {data.service === "airport_concierge" && data.airportDirection && (
+                <div className="flex justify-between gap-6">
+                  <span>Airport flow</span>
+                  <span style={{ color: IVORY }}>{data.airportDirection === "arrival" ? "Arrival" : "Departure"}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <p className="mt-4 text-[11px] leading-relaxed" style={{ color: MIST }}>
+            Estimate is a planning guide. Final quote may change after route, timing, personnel, vehicle, and risk details are reviewed.
+          </p>
         </div>
 
         {/* Nav */}
@@ -1934,7 +2038,7 @@ const ContactPage = () => (
   </div>
 );
 
-const CONTACT_ENDPOINT = "https://formsubmit.co/ajax/contact@gbejasecurity.com";
+const CONTACT_ENDPOINT = "https://formsubmit.co/ajax/contact@gbejaglobalsecurity.com";
 
 const ContactForm = () => {
   const [form, setForm] = useState({ name: "", org: "", email: "", phone: "", interest: "", msg: "" });
@@ -2005,6 +2109,7 @@ const ContactForm = () => {
           style={{ borderColor: `${GOLD}40`, color: IVORY }}>
           <option value="" style={{ backgroundColor: NAVY }}>Select…</option>
           <option style={{ backgroundColor: NAVY }}>Airport Concierge</option>
+          <option style={{ backgroundColor: NAVY }}>Airport Transfer</option>
           <option style={{ backgroundColor: NAVY }}>In-Town Transportation</option>
           <option style={{ backgroundColor: NAVY }}>Private Protection</option>
           <option style={{ backgroundColor: NAVY }}>Emergency Response</option>
@@ -2064,11 +2169,11 @@ const ChatWidget = () => {
           max_tokens: 400,
           system: `You are the AI concierge for Gbèjà Global Security Solutions, a premium private security firm based in Lagos, Nigeria. Be warm, concise, professional, and confident. Speak in 2-4 sentences. You can answer questions about:
 
-- Services: Airport Concierge & Transfers, In-Town Transportation, Specialised Private Protection, Emergency Response (Lagos: ~10 min response, 3 stations across Ikoyi/VI/Lekki).
+- Services: Airport Concierge, Airport Transfer, In-Town Transportation, Specialised Private Protection, Emergency Response (Lagos: ~10 min response, 3 stations across Ikoyi/VI/Lekki).
 - Coverage: All 36 Nigerian states; deepest in Lagos, Abuja, Port Harcourt.
 - Stats: 350,000+ km safely escorted, 120+ principal operations, 10,000+ hours of protection coverage, 100% safe transfer record.
 - Team: Founder Ajibola Kolajo (ex-World Bank/Tony Blair Institute), COO Ayotomi Banjoko (ex-PwC), advisors include retired DIG of Police, retired Nigerian Army Colonel.
-- Differentiators: Single coordinated platform, 24/7 named account directors, naira billing, sovereign intelligence network, veteran-trained personnel.
+- Differentiators: Single coordinated platform, 24/7 named account directors, naira billing, ground intelligence network, veteran-trained personnel.
 - Intelligence subscriptions: Open Daily (free), Subscriber (~₦450K/month), Bespoke (engagement-based).
 - Contact: WhatsApp +234 706 321 6174, contact@gbejasecurity.com.
 
@@ -2209,73 +2314,80 @@ const ContactRail = () => {
 };
 
 // ── FOOTER ───────────────────────────────────────────────────────
-const Footer = ({ setPage }) => (
-  <footer className="relative pt-20 pb-10 px-6 md:px-10 border-t" style={{ borderColor: `${GOLD}25`, backgroundColor: NAVY_DEEP }}>
-    <div className="max-w-[1400px] mx-auto">
-      <div className="grid lg:grid-cols-12 gap-12 mb-16">
-        <div className="lg:col-span-4">
-          <Logo />
-          <p className="mt-6 text-[14px] leading-relaxed max-w-sm" style={{ color: MIST }}>
-            A premium private security firm built for those who navigate Nigeria with the highest expectations.
-            We don't sleep, so you can.
-          </p>
-        </div>
-        <div className="lg:col-span-2">
-          <div className="text-[10px] tracking-[0.25em] uppercase mb-4" style={{ color: GOLD }}>Services</div>
-          {["Airport Concierge", "Transportation", "Private Protection", "Emergency Response", "Intelligence"].map(l => (
-            <button key={l} onClick={() => setPage("services")} className="block py-1.5 text-[13px] hover:opacity-70 transition-opacity text-left" style={{ color: IVORY }}>
-              {l}
-            </button>
-          ))}
-        </div>
-        <div className="lg:col-span-2">
-          <div className="text-[10px] tracking-[0.25em] uppercase mb-4" style={{ color: GOLD }}>Firm</div>
-          {[["About", "about"], ["Team", "about"], ["Insights", "insights"], ["Sectors", "sectors"], ["Client Portal", "dashboard"]].map(([l, p]) => (
-            <button key={l} onClick={() => setPage(p)} className="block py-1.5 text-[13px] hover:opacity-70 transition-opacity text-left" style={{ color: IVORY }}>
-              {l}
-            </button>
-          ))}
-        </div>
-        <div className="lg:col-span-4">
-          <div className="text-[10px] tracking-[0.25em] uppercase mb-4" style={{ color: GOLD }}>Direct</div>
-          <div className="space-y-2.5">
-            <a href="tel:+2347063216174" className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
-              <Phone size={13} style={{ color: GOLD }} /> +234 706 321 6174
-            </a>
-            <a href="mailto:contact@gbejasecurity.com" className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
-              <Mail size={13} style={{ color: GOLD }} /> contact@gbejasecurity.com
-            </a>
-            <div className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
-              <MapPin size={13} style={{ color: GOLD }} /> Ikoyi · Lagos · Nigeria
+const Footer = ({ setPage }) => {
+  const go = (page) => {
+    setPage(page);
+    window.scrollTo(0, 0);
+  };
+
+  return (
+    <footer className="relative pt-20 pb-10 px-6 md:px-10 border-t" style={{ borderColor: `${GOLD}25`, backgroundColor: NAVY_DEEP }}>
+        <div className="max-w-[1400px] mx-auto">
+          <div className="grid lg:grid-cols-12 gap-12 mb-16">
+            <div className="lg:col-span-4">
+              <Logo />
+              <p className="mt-6 text-[14px] leading-relaxed max-w-sm" style={{ color: MIST }}>
+                A premium private security firm built for those who navigate Nigeria with the highest expectations.
+                We don't sleep, so you can.
+              </p>
+            </div>
+            <div className="lg:col-span-2">
+              <div className="text-[10px] tracking-[0.25em] uppercase mb-4" style={{ color: GOLD }}>Services</div>
+              {["Airport Concierge", "Airport Transfer", "Transportation", "Private Protection", "Emergency Response", "Intelligence"].map(l => (
+                <button key={l} onClick={() => go("services")} className="block py-1.5 text-[13px] hover:opacity-70 transition-opacity text-left" style={{ color: IVORY }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+            <div className="lg:col-span-2">
+              <div className="text-[10px] tracking-[0.25em] uppercase mb-4" style={{ color: GOLD }}>Firm</div>
+              {[["About", "about"], ["Team", "about"], ["Insights", "insights"], ["Client Portal", "dashboard"]].map(([l, p]) => (
+                <button key={l} onClick={() => go(p)} className="block py-1.5 text-[13px] hover:opacity-70 transition-opacity text-left" style={{ color: IVORY }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+            <div className="lg:col-span-4">
+              <div className="text-[10px] tracking-[0.25em] uppercase mb-4" style={{ color: GOLD }}>Direct</div>
+              <div className="space-y-2.5">
+                <a href="tel:+2347063216174" className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
+                  <Phone size={13} style={{ color: GOLD }} /> +234 706 321 6174
+                </a>
+                <a href="mailto:contact@gbejasecurity.com" className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
+                  <Mail size={13} style={{ color: GOLD }} /> contact@gbejasecurity.com
+                </a>
+                <div className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
+                  <MapPin size={13} style={{ color: GOLD }} /> Ikoyi · Lagos · Nigeria
+                </div>
+              </div>
+              <div className="flex gap-2 mt-6">
+                {[
+                  { i: MessageCircle, h: "https://wa.me/2347063216174" },
+                  { i: Instagram, h: "https://instagram.com/gbejasecurity" },
+                  { i: Linkedin, h: "https://linkedin.com" }
+                ].map((s, i) => (
+                  <a key={i} href={s.h} target="_blank" rel="noreferrer"
+                    className="w-10 h-10 flex items-center justify-center border transition-all hover:bg-white/5"
+                    style={{ borderColor: `${GOLD}40`, color: GOLD }}>
+                    <s.i size={14} />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="flex gap-2 mt-6">
-            {[
-              { i: MessageCircle, h: "https://wa.me/2347063216174" },
-              { i: Instagram, h: "https://instagram.com/gbejasecurity" },
-              { i: Linkedin, h: "https://linkedin.com" }
-            ].map((s, i) => (
-              <a key={i} href={s.h} target="_blank" rel="noreferrer"
-                className="w-10 h-10 flex items-center justify-center border transition-all hover:bg-white/5"
-                style={{ borderColor: `${GOLD}40`, color: GOLD }}>
-                <s.i size={14} />
-              </a>
-            ))}
+
+          <div className="pt-8 border-t flex flex-col md:flex-row justify-between gap-4 items-center" style={{ borderColor: `${GOLD}15` }}>
+            <div className="text-[11px] tracking-[0.15em]" style={{ color: MIST }}>
+              © 2026 Gbèjà Global Security Solutions. All rights reserved.
+            </div>
+            <div className="flex gap-6 text-[11px] tracking-[0.15em] uppercase" style={{ color: MIST }}>
+              <span>Privacy</span><span>Terms</span><span>Confidentiality Charter</span>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="pt-8 border-t flex flex-col md:flex-row justify-between gap-4 items-center" style={{ borderColor: `${GOLD}15` }}>
-        <div className="text-[11px] tracking-[0.15em]" style={{ color: MIST }}>
-          © 2026 Gbèjà Global Security Solutions. All rights reserved.
-        </div>
-        <div className="flex gap-6 text-[11px] tracking-[0.15em] uppercase" style={{ color: MIST }}>
-          <span>Privacy</span><span>Terms</span><span>Confidentiality Charter</span>
-        </div>
-      </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 // ── ROOT ─────────────────────────────────────────────────────────
 export default function GbejaWebsite() {
@@ -2285,7 +2397,6 @@ export default function GbejaWebsite() {
     home: <HomePage setPage={setPage} />,
     services: <ServicesPage setPage={setPage} />,
     intelligence: <IntelligencePage setPage={setPage} />,
-    sectors: <SectorsPage setPage={setPage} />,
     about: <AboutPage />,
     insights: <InsightsPage />,
     booking: <BookingPage setPage={setPage} />,
@@ -2298,9 +2409,296 @@ export default function GbejaWebsite() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap');
         body, html { font-family: 'DM Sans', sans-serif; background: ${NAVY_DEEP}; }
+        .hero-visual {
+          position: absolute;
+          top: 41%;
+          right: clamp(24px, 3.5vw, 80px);
+          width: clamp(760px, 56vw, 1080px);
+          transform: translate3d(0, -50%, 0);
+          opacity: 0;
+          pointer-events: none;
+          z-index: 0;
+          animation: heroVisualIn 1200ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
+          -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 20%, #000 44%, #000 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.1) 20%, #000 44%, #000 100%);
+        }
+        .hero-visual img {
+          display: block;
+          width: 100%;
+          height: auto;
+          filter: saturate(0.9) contrast(1.05);
+        }
+        .hero-eyebrow {
+          perspective: 720px;
+        }
+        .hero-eyebrow__rule {
+          transform-origin: left center;
+          animation: heroRuleIn 700ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+        }
+        .hero-eyebrow__mask {
+          display: inline-flex;
+          overflow: hidden;
+          padding-block: 0.2em;
+        }
+        .hero-eyebrow__text {
+          display: inline-block;
+          transform-origin: 50% 100%;
+          animation: heroEyebrowRollIn 760ms cubic-bezier(0.22, 1, 0.36, 1) 240ms both;
+          will-change: transform, opacity;
+        }
+        .hero-reveal {
+          opacity: 0;
+          transform: translate3d(0, 14px, 0);
+          animation: heroContentIn 780ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          will-change: transform, opacity;
+        }
+        h1.hero-reveal {
+          animation-delay: 360ms;
+        }
+        p.hero-reveal {
+          animation-delay: 500ms;
+        }
+        div.hero-reveal {
+          animation-delay: 640ms;
+        }
+        .hero-stat {
+          opacity: 0;
+          transform: translate3d(0, 10px, 0);
+          will-change: transform, opacity;
+        }
+        .hero-stat.is-visible {
+          animation: heroStatIn 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .service-card {
+          position: relative;
+          overflow: hidden;
+          min-height: 420px;
+        }
+        .service-card::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border: 1px solid transparent;
+          pointer-events: none;
+          transition: border-color 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .service-card__mark {
+          position: relative;
+          width: 88px;
+          height: 88px;
+          border: 1px solid ${GOLD}55;
+          background:
+            linear-gradient(135deg, ${GOLD}14, transparent 58%),
+            ${NAVY_DEEP}33;
+          transition:
+            border-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+            transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .service-card__mark::before,
+        .service-card__mark::after {
+          content: "";
+          position: absolute;
+          pointer-events: none;
+        }
+        .service-card__mark::before {
+          inset: 9px;
+          border: 1px solid ${GOLD}22;
+        }
+        .service-card__mark::after {
+          width: 26px;
+          height: 1px;
+          right: -13px;
+          top: 50%;
+          background: ${GOLD}55;
+        }
+        .service-card__cta {
+          background: ${NAVY_DEEP}55;
+        }
+        .service-card:hover {
+          background-color: ${NAVY_SOFT} !important;
+        }
+        .service-card:hover::before {
+          border-color: ${GOLD}24;
+        }
+        .service-card:hover .service-card__mark {
+          border-color: ${GOLD};
+          background:
+            linear-gradient(135deg, ${GOLD}20, transparent 58%),
+            ${NAVY_DEEP}55;
+          transform: translate3d(0, -2px, 0);
+        }
+        .service-card:hover .service-card__cta {
+          border-color: ${GOLD};
+          color: ${GOLD} !important;
+          background: ${NAVY_DEEP}88;
+        }
+        .service-tab {
+          position: relative;
+          min-height: 190px;
+          overflow: hidden;
+        }
+        .service-tab::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 2px;
+          background: ${GOLD};
+          transform: scaleX(0);
+          transform-origin: left center;
+          transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .service-tab__mark {
+          width: 56px;
+          height: 56px;
+          border: 1px solid ${GOLD}28;
+          background: ${NAVY_DEEP}33;
+          transition:
+            border-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+            transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .service-tab:hover .service-tab__mark,
+        .service-tab.is-active .service-tab__mark {
+          border-color: ${GOLD};
+          background: ${GOLD}12;
+          transform: translate3d(0, -2px, 0);
+        }
+        .service-tab:hover::after,
+        .service-tab.is-active::after {
+          transform: scaleX(1);
+        }
+        .service-detail-grid {
+          align-items: start;
+        }
+        .service-detail-mark {
+          position: relative;
+          width: 88px;
+          height: 88px;
+          flex: 0 0 auto;
+          border: 1px solid ${GOLD}55;
+          background:
+            linear-gradient(135deg, ${GOLD}14, transparent 58%),
+            ${NAVY_DEEP}33;
+        }
+        .service-detail-mark::before {
+          content: "";
+          position: absolute;
+          inset: 9px;
+          border: 1px solid ${GOLD}22;
+          pointer-events: none;
+        }
+        .service-stat-strip,
+        .service-brief {
+          border: 1px solid ${GOLD}18;
+        }
+        .service-chip {
+          background: ${NAVY_DEEP}33;
+        }
+        .service-deliverable {
+          min-height: 44px;
+        }
+        .service-step {
+          padding-bottom: 1.5rem;
+          border-bottom: 1px solid ${GOLD}14;
+        }
+        .service-step:last-child {
+          padding-bottom: 0;
+          border-bottom: 0;
+        }
+        .reveal-eyebrow {
+          perspective: 720px;
+        }
+        .reveal-eyebrow__rule {
+          opacity: 0;
+          transform: scaleX(0);
+          transform-origin: left center;
+        }
+        .reveal-eyebrow__mask {
+          display: inline-flex;
+          overflow: hidden;
+          padding-block: 0.2em;
+        }
+        .reveal-eyebrow__text {
+          display: inline-block;
+          opacity: 0;
+          transform: translate3d(0, 115%, 0) rotateX(-72deg);
+          transform-origin: 50% 100%;
+          will-change: transform, opacity;
+        }
+        .reveal-eyebrow.is-visible .reveal-eyebrow__rule {
+          animation: heroRuleIn 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .reveal-eyebrow.is-visible .reveal-eyebrow__text {
+          animation: heroEyebrowRollIn 760ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+        }
+        .scroll-reveal {
+          opacity: 0;
+          transform: translate3d(0, 16px, 0);
+          will-change: opacity, transform;
+        }
+        .scroll-reveal.is-visible {
+          animation: scrollRevealIn 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @keyframes heroRuleIn {
+          from { opacity: 0; transform: scaleX(0); }
+          to { opacity: 1; transform: scaleX(1); }
+        }
+        @keyframes heroEyebrowRollIn {
+          from {
+            opacity: 0;
+            transform: translate3d(0, 115%, 0) rotateX(-72deg);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) rotateX(0deg);
+          }
+        }
+        @keyframes heroStatIn {
+          from { opacity: 0; transform: translate3d(0, 10px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes heroContentIn {
+          from { opacity: 0; transform: translate3d(0, 14px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        @keyframes heroVisualIn {
+          from { opacity: 0; transform: translate3d(28px, -50%, 0); }
+          to { opacity: 0.62; transform: translate3d(0, -50%, 0); }
+        }
+        @keyframes scrollRevealIn {
+          from { opacity: 0; transform: translate3d(0, 16px, 0); }
+          to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .hero-reveal,
+          .hero-stat,
+          .hero-eyebrow__rule,
+          .hero-eyebrow__text,
+          .reveal-eyebrow__rule,
+          .reveal-eyebrow__text,
+          .scroll-reveal {
+            animation: none;
+            opacity: 1;
+            transform: none;
+            will-change: auto;
+          }
+          .hero-visual {
+            animation: none;
+            opacity: 0.54;
+            transform: translate3d(0, -50%, 0);
+          }
+        }
+        @media (max-width: 1023px) {
+          .hero-visual {
+            display: none;
+          }
         }
         ::selection { background: ${GOLD}; color: ${NAVY_DEEP}; }
         input::placeholder, textarea::placeholder { color: ${MIST}80; }
