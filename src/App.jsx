@@ -1999,7 +1999,7 @@ const ContactPage = () => (
           {[
             { i: Phone, l: "24/7 Operations Line", v: "+234 706 321 6174", h: "tel:+2347063216174" },
             { i: MessageCircle, l: "WhatsApp", v: "Tap to message", h: "https://wa.me/2347063216174" },
-            { i: Mail, l: "Email", v: "contact@gbejasecurity.com", h: "mailto:contact@gbejasecurity.com" },
+            { i: Mail, l: "Email", v: "contact@gbejaglobalsecurity.com", h: "mailto:contact@gbejaglobalsecurity.com" },
             { i: Linkedin, l: "LinkedIn", v: "Gbeja Global Security Solutions", h: "https://linkedin.com" },
             { i: Instagram, l: "Instagram", v: "@gbejasecurity", h: "https://instagram.com/gbejasecurity" }
           ].map(c => (
@@ -2175,7 +2175,7 @@ const ChatWidget = () => {
 - Team: Founder Ajibola Kolajo (ex-World Bank/Tony Blair Institute), COO Ayotomi Banjoko (ex-PwC), advisors include retired DIG of Police, retired Nigerian Army Colonel.
 - Differentiators: Single coordinated platform, 24/7 named account directors, naira billing, ground intelligence network, veteran-trained personnel.
 - Intelligence subscriptions: Open Daily (free), Subscriber (~₦450K/month), Bespoke (engagement-based).
-- Contact: WhatsApp +234 706 321 6174, contact@gbejasecurity.com.
+- Contact: WhatsApp +234 706 321 6174, contact@gbejaglobalsecurity.com.
 
 For active deployments, panics, sensitive client matters, pricing for custom engagements, or anything requiring human judgement, gracefully say you'll connect them to the team on WhatsApp. Never invent specifics not provided. Keep responses tight — this is a chat widget on a phone screen.`,
           messages: conversation
@@ -2283,7 +2283,7 @@ const ContactRail = () => {
   const channels = [
     { i: MessageCircle, l: "WhatsApp", h: "https://wa.me/2347063216174", c: "#25D366" },
     { i: Phone, l: "Call", h: "tel:+2347063216174", c: GOLD },
-    { i: Mail, l: "Email", h: "mailto:contact@gbejasecurity.com", c: GOLD },
+    { i: Mail, l: "Email", h: "mailto:contact@gbejaglobalsecurity.com", c: GOLD },
     { i: Instagram, l: "Instagram", h: "https://instagram.com/gbejasecurity", c: GOLD },
     { i: Linkedin, l: "LinkedIn", h: "https://linkedin.com", c: GOLD }
   ];
@@ -2353,8 +2353,8 @@ const Footer = ({ setPage }) => {
                 <a href="tel:+2347063216174" className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
                   <Phone size={13} style={{ color: GOLD }} /> +234 706 321 6174
                 </a>
-                <a href="mailto:contact@gbejasecurity.com" className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
-                  <Mail size={13} style={{ color: GOLD }} /> contact@gbejasecurity.com
+                <a href="mailto:contact@gbejaglobalsecurity.com" className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
+                  <Mail size={13} style={{ color: GOLD }} /> contact@gbejaglobalsecurity.com
                 </a>
                 <div className="flex items-center gap-3 text-[13px]" style={{ color: IVORY }}>
                   <MapPin size={13} style={{ color: GOLD }} /> Ikoyi · Lagos · Nigeria
