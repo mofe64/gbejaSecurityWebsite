@@ -9,6 +9,15 @@ import {
   Layers, Zap, Target
 } from "lucide-react";
 import heroOperationalTerrain from "./assets/hero-operational-terrain.webp";
+import RedesignedHomePage from "./home/HomePage.jsx";
+import ServicePage from "./services/ServicePage.jsx";
+import { SERVICE_PAGES } from "./services/serviceData.js";
+import RedesignedAboutPage from "./about/AboutPage.jsx";
+import SignalPage from "./signal/SignalPage.jsx";
+import BlogPage from "./blog/BlogPage.jsx";
+import ArticlePage from "./blog/ArticlePage.jsx";
+import CareersPage from "./careers/CareersPage.jsx";
+import RedesignedContactPage from "./contact/ContactPage.jsx";
 
 // ─────────────────────────────────────────────────────────────────
 //  GBÈJÀ GLOBAL SECURITY — Website
@@ -1002,7 +1011,7 @@ const IntelligencePage = ({ setPage }) => {
           <p className="text-lg max-w-3xl leading-relaxed" style={{ color: MIST }}>
             Most country reports on Nigeria are written from London or Reston, by analysts who change every two years.
             Our daily and weekly briefings are written here, by people who have driven the routes,
-            walked the venues, and met the gatekeepers.
+            walked the venues, and witnessed the risk.
           </p>
         </div>
       </section>
@@ -2391,7 +2400,46 @@ const Footer = ({ setPage }) => {
 
 // ── ROOT ─────────────────────────────────────────────────────────
 export default function GbejaWebsite() {
-  const [page, setPage] = useState("home");
+  // The current page lives in the URL hash so a page can be linked to and the back button works.
+  const [page, setPage] = useState(() => window.location.hash.slice(1) || "home");
+  useEffect(() => {
+    const hash = page === "home" ? "" : `#${page}`;
+    if (window.location.hash !== hash) {
+      window.history.pushState(null, "", hash || window.location.pathname + window.location.search);
+    }
+  }, [page]);
+  useEffect(() => {
+    const onPop = () => setPage(window.location.hash.slice(1) || "home");
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // The home page follows the new Figma design and brings its own nav and
+  // footer. The other pages keep the previous layout until they are rebuilt.
+  // Redesigned pages (Figma: Gbeja › website design). "services" lands on the home page's services section.
+  const go = (id) => {
+    if (id === "services") {
+      setPage("home");
+      setTimeout(() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }), 50);
+      return;
+    }
+    // Every "Request service" / "Book service" button goes to the Contact form, which emails the Operations Centre.
+    if (id === "booking") id = "contact#contact-form";
+    // "page#section" opens the page and scrolls to that section.
+    const [target, anchor] = id.split("#");
+    setPage(target);
+    window.scrollTo(0, 0);
+    if (anchor) setTimeout(() => document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+  if (page === "home") return <RedesignedHomePage go={go} />;
+  if (page === "about") return <RedesignedAboutPage go={go} />;
+  if (page === "intelligence") return <SignalPage go={go} />;
+  if (page === "insights") return <BlogPage go={go} />;
+  if (page === "article-lagos-arrivals") return <ArticlePage go={go} />;
+  if (page === "careers") return <CareersPage go={go} />;
+  if (page === "contact") return <RedesignedContactPage go={go} />;
+  const servicePage = SERVICE_PAGES.find((s) => `service-${s.slug}` === page);
+  if (servicePage) return <ServicePage key={servicePage.slug} page={servicePage} go={go} />;
 
   const pages = {
     home: <HomePage setPage={setPage} />,
